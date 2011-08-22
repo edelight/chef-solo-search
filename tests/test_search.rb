@@ -110,11 +110,11 @@ class TestSearch < Test::Unit::TestCase
   end
   
   def test_NOT_condition
-    nodes = search(:users, "children:tom NOT gender:female")
+    nodes = search(:users, "children:tom AND (NOT gender:female)")
     assert nodes.length == 1
-    nodes = search(:users, "children:tom NOT gender:female AND age:42")
+    nodes = search(:users, "children:tom AND (NOT gender:female) AND age:42")
     assert nodes.length == 1
-    nodes = search(:users, "children:tom NOT gender:female NOT age:42")
+    nodes = search(:users, "children:tom AND (NOT gender:female) AND (NOT age:42)")
     assert nodes.length == 0
   end
   
@@ -138,17 +138,17 @@ class TestSearch < Test::Unit::TestCase
   end
   
   def test_check_escaped_chars
-    nodes = search(:users, "tag:tag\:\:test")
+    nodes = search(:users, 'tag:tag\:\:test')
     assert nodes.length == 1
-    nodes = search(:users, "tag:tag::test")
+    nodes = search(:users, "tag:tag\\:\\:test")
     assert nodes.length == 1
-    nodes = search(:users, "tags:tag\:\:first")
+    nodes = search(:users, 'tags:tag\:\:first')
     assert nodes.length == 1
-    nodes = search(:users, "tags:tag::first")
+    nodes = search(:users, "tags:tag\\:\\:first")
     assert nodes.length == 1
-    nodes = search(:users, "tags:tag\:\:*")
+    nodes = search(:users, 'tags:tag\:\:*')
     assert nodes.length == 1
-    nodes = search(:users, "tags:tag::*")
+    nodes = search(:users, "tags:tag\\:\\:*")
     assert nodes.length == 1
   end
   
@@ -159,4 +159,12 @@ class TestSearch < Test::Unit::TestCase
     assert nodes == search(:users, "*:*")
   end
   
+  def test_wildcards
+    nodes = search(:users, "gender:f??ale")
+    assert nodes.length == 1
+    nodes = search(:users, "username:spee?y")
+    assert nodes.length == 1
+    nodes = search(:users, "username:spee*")
+    assert nodes.length == 1
+  end
 end
