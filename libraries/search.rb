@@ -35,47 +35,113 @@ if Chef::Config[:solo]
   
   require_relative 'parser.rb'
   
+#  class Chef
+#    class Recipe
+#      
+#      # Overwrite the search method of recipes to operate locally by using
+#      # data found in data_bags.
+#      # Only very basic lucene syntax is supported and also sorting the result
+#      # is not implemented, if this search method does not support a given query
+#      # an exception is raised.
+#      # This search() method returns a block iterator or an Array, depending
+#      # on how this method is called.
+#      def search(bag_name, query=nil, sort=nil, start=0, rows=1000, &block)
+#        if !sort.nil?
+#          raise "Sorting search results is not supported"
+#        end
+#        @_query = Query.parse(query)
+#        if @_query.nil?
+#          raise "Query #{query} is not supported"
+#        end
+#        if block_given?
+#          pos = 0
+#        else
+#          result = []
+#        end
+#        data_bag(bag_name.to_s).each do |bag_item_id|
+#          bag_item = data_bag_item(bag_name.to_s, bag_item_id)
+#          if @_query.match(bag_item)
+#            if block_given?
+#              if (pos >= start and pos < (start + rows))
+#                yield bag_item
+#              end
+#              pos += 1
+#            else
+#              result << bag_item
+#            end
+#          end
+#        end
+#        if !block_given?
+#          return result.slice(start, rows)
+#        end
+#      end
+#    end
+#  end
+
+  # We also need to define it here in case search() is called not from a recipe but from a resource.
+  # For example in cookbooks/users/providers/manage.rb
   class Chef
-    class Recipe
-      
-      # Overwrite the search method of recipes to operate locally by using
-      # data found in data_bags.
-      # Only very basic lucene syntax is supported and also sorting the result
-      # is not implemented, if this search method does not support a given query
-      # an exception is raised.
-      # This search() method returns a block iterator or an Array, depending
-      # on how this method is called.
-      def search(bag_name, query=nil, sort=nil, start=0, rows=1000, &block)
-        if !sort.nil?
-          raise "Sorting search results is not supported"
-        end
-        @_query = Query.parse(query)
-        if @_query.nil?
-          raise "Query #{query} is not supported"
-        end
-        if block_given?
-          pos = 0
-        else
-          result = []
-        end
-        data_bag(bag_name.to_s).each do |bag_item_id|
-          bag_item = data_bag_item(bag_name.to_s, bag_item_id)
-          if @_query.match(bag_item)
-            if block_given?
-              if (pos >= start and pos < (start + rows))
-                yield bag_item
+    module Mixin
+      module Language
+
+        # override gems/chef-0.10.8/lib/chef/mixin/language.rb
+       #def search(*args, &block)
+       #  # If you pass a block, or have at least the start argument, do raw result parsing
+       #  #
+       #  # Otherwise, do the iteration for the end user
+       #  if Kernel.block_given? || args.length >= 4
+       #    Chef::Search::Query.new.search(*args, &block)
+       #  else
+       #    results = Array.new
+       #    Chef::Search::Query.new.search(*args) do |o|
+       #      results << o
+       #    end
+       #    results
+       #  end
+       #end
+
+        # with:
+        # Overwrite the search method of recipes to operate locally by using
+        # data found in data_bags.
+        # Only very basic lucene syntax is supported and also sorting the result
+        # is not implemented, if this search method does not support a given query
+        # an exception is raised.
+        # This search() method returns a block iterator or an Array, depending
+        # on how this method is called.
+        def search(bag_name, query=nil, sort=nil, start=0, rows=1000, &block)
+          if !sort.nil?
+            raise "Sorting search results is not supported"
+          end
+          @_query = Query.parse(query)
+          if @_query.nil?
+            raise "Query #{query} is not supported"
+          end
+          if block_given?
+            pos = 0
+          else
+            result = []
+          end
+          data_bag(bag_name.to_s).each do |bag_item_id|
+            bag_item = data_bag_item(bag_name.to_s, bag_item_id)
+            if @_query.match(bag_item)
+              if block_given?
+                if (pos >= start and pos < (start + rows))
+                  yield bag_item
+                end
+                pos += 1
+              else
+                result << bag_item
               end
-              pos += 1
-            else
-              result << bag_item
             end
           end
+          if !block_given?
+            return result.slice(start, rows)
+          end
         end
-        if !block_given?
-          return result.slice(start, rows)
-        end
+
       end
     end
   end
 
 end
+
