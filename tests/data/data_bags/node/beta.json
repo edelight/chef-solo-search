@@ -1,0 +1,10 @@
+{
+  "id":       "beta",
+  "name":     "beta.example.com",
+  "json_class": "Chef::Node",
+  "run_list": ["role[test_server]","role[beta_server]"],
+  "chef_environment": "default",
+  "automatic": {
+    "hostname": "beta.example.com"
+  }
+}
