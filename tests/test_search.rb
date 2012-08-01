@@ -123,6 +123,17 @@ class TestSearchDB < Test::Unit::TestCase
     assert nodes.length == 2
   end
   
+  def test_any_value_lucene_range
+    nodes = search(:users, "address:[* TO *]")
+    assert nodes.length == 2
+  end
+  
+  def test_general_lucene_range_fails
+    assert_raises RuntimeError do
+      nodes = search(:users, "children:[aaa TO zzz]")
+    end
+  end
+  
   def test_block_usage
     # bracket syntax
     result = []
