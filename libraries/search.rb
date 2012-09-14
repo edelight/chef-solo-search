@@ -20,7 +20,7 @@
 if Chef::Config[:solo]
 
   if (defined? require_relative).nil?
-    # defenition of 'require_relative' for ruby < 1.9, found on stackoverflow.com
+    # definition of 'require_relative' for ruby < 1.9, found on stackoverflow.com
     def require_relative(relative_feature)
       c = caller.first
       fail "Can't parse #{c}" unless c.rindex(/:\d+(:in `.*')?$/)

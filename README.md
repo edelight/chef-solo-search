@@ -1,7 +1,7 @@
 # chef-solo-search
 
 Chef-solo-search is a cookbook library that adds data bag search powers
-to Chef Solo. Data bag support was added to Chef Solo by Chef 0.10.4
+to Chef Solo. Data bag support was added to Chef Solo by Chef 0.10.4.
 Please see *Supported queries* for a list of query types which are supported.
 
 ## Requirements
@@ -12,8 +12,8 @@ Please see *Supported queries* for a list of query types which are supported.
 ## Installation
 
 In order to use this extension, create a (dummy-) cookbook and add a directory
-called *libraries*. Next copy *libraries/search.rb* to the newly created directory.
-Now you have to make sure chef-solo knows about data bags, therefor add
+called *libraries*. Next copy *libraries/search.rb* and *libraries/parser.rb* to the newly created directory.
+Now you have to make sure chef-solo knows about data bags, therefore add
 
     data_bag_path "<node_work_path>/data_bags"
     
