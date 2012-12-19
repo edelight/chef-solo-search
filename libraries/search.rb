@@ -50,54 +50,69 @@ if Chef::Config[:solo]
           if !sort.nil?
             raise "Sorting search results is not supported"
           end
-          @_query = Query.parse(query)
-          if @_query.nil?
+          _query = Query.parse(query)
+          if _query.nil?
             raise "Query #{query} is not supported"
           end
-          @_result = []
+          _result = []
 
           case obj
           when :node
-            search_nodes(start, rows, &block)
+            nodes = search_nodes(_query, start, rows, &block)
+            _result += nodes
           when :role
-            search_roles(start, rows, &block)
+            roles = search_roles(_query, start, rows, &block)
+             _result += roles
           else
-            search_data_bag(obj, start, rows, &block)
+            bags = search_data_bag(_query, obj, start, rows, &block)
+            _result += bags
           end
           
 
           if block_given?
             pos = 0
-            while (pos >= start and pos < (start + rows) and pos < @_result.size)
-              yield @_result[pos]
+            while (pos >= start and pos < (start + rows) and pos < _result.size)
+              yield _result[pos]
               pos += 1
             end
           else
-            return @_result.slice(start, rows)
+            return _result.slice(start, rows)
           end
         end
 
-        def search_nodes(start, rows, &block)
+        def search_nodes(_query, start, rows, &block)
+          _result = []
           Dir.glob(File.join(Chef::Config[:data_bag_path], "node", "*.json")).map do |f|
             # parse and hashify the node
             node = JSON.parse(IO.read(f))
-            if @_query.match(node.to_hash)
-              @_result << node
+            if _query.match(node.to_hash)
+              _result << node
             end
           end
+          return _result
         end
 
-        def search_roles(start, rows, &block)
-          raise "Role searching not implemented"
+        def search_roles(_query, start, rows, &block)
+          _result = []
+          Dir.glob(File.join(Chef::Config[:role_path], "*.json")).map do |f|
+            # parse and hashify the role
+            role = JSON.parse(IO.read(f))
+            if _query.match(role.to_hash)
+              _result << role
+            end
+          end
+          return _result
         end
 
-        def search_data_bag(bag_name, start, rows, &block)
+        def search_data_bag(_query, bag_name, start, rows, &block)
+          _result = []
           data_bag(bag_name.to_s).each do |bag_item_id|
             bag_item = data_bag_item(bag_name.to_s, bag_item_id)
-            if @_query.match(bag_item)
-              @_result << bag_item
+            if _query.match(bag_item)
+              _result << bag_item
             end
           end
+          return _result
         end
       end
     end
