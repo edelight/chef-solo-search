@@ -67,7 +67,7 @@ if Chef::Config[:solo]
             bags = search_data_bag(_query, obj, start, rows, &block)
             _result += bags
           end
-          
+
 
           if block_given?
             pos = 0
@@ -105,9 +105,14 @@ if Chef::Config[:solo]
         end
 
         def search_data_bag(_query, bag_name, start, rows, &block)
+          secret_path = Chef::Config[:encrypted_data_bag_secret]
           _result = []
           data_bag(bag_name.to_s).each do |bag_item_id|
-            bag_item = data_bag_item(bag_name.to_s, bag_item_id)
+            if secret_path && secret = Chef::EncryptedDataBagItem.load_secret(secret_path)
+              bag_item = Chef::EncryptedDataBagItem.load(bag_name, bag_item_id, secret)
+            else
+              bag_item = data_bag_item(bag_name.to_s, bag_item_id)
+            end
             if _query.match(bag_item)
               _result << bag_item
             end
