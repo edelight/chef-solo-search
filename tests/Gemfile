@@ -1,0 +1,6 @@
+source :rubygems
+
+gem 'chef'
+gem 'ruby-wmi'
+gem 'test-unit'
+gem 'win32-service'
