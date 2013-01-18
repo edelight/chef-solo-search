@@ -117,4 +117,22 @@ if Chef::Config[:solo]
       end
     end
   end
+
+  class QuerySearchHelper
+    class << self
+      include Chef::Mixin::Language
+    end
+  end
+
+  class Chef
+    class Search
+      class Query
+        def initialize(*args)
+        end
+        def search(*args, &block)
+          QuerySearchHelper.search(*args, &block)
+        end
+      end
+    end
+  end
 end

@@ -23,20 +23,12 @@ require "chef"
 # mocking chef such that it thinks it's running as chef-solo and knows about
 # the location of the data_bag
 Chef::Config[:solo] = true
-Chef::Config[:data_bag_path] = "tests/data/data_bags"
+Chef::Config[:data_bag_path] = "#{File.dirname(__FILE__)}/data/data_bags"
 
 # load the extension
 require File.expand_path('../../libraries/search', __FILE__)
 
-def search(*args, &block)
-  # wrapper around creating a new Recipe instance and calling search on it
-  node = Chef::Node.new()
-  cookbooks = Chef::CookbookCollection.new()
-  run_context = Chef::RunContext.new(node, cookbooks, nil)
-  return Chef::Recipe.new("test_cookbook", "test_recipe", run_context).search(*args, &block)
-end
-
-class TestSearchDB < Test::Unit::TestCase
+module SearchDbTests
   
   def test_search_all
     # try to get data of all users
@@ -197,7 +189,7 @@ class TestSearchDB < Test::Unit::TestCase
   end
 end
 
-class TestSearchNode < Test::Unit::TestCase
+module SearchNodeTests
   def test_list_nodes
     nodes = search(:node)
     assert_equal Chef::Node, nodes.first.class
@@ -219,3 +211,26 @@ class TestSearchNode < Test::Unit::TestCase
     assert_equal 1, nodes.length
   end
 end
+
+class TestImplicitSearchDB < Test::Unit::TestCase
+  include SearchDbTests
+  include SearchNodeTests
+
+  def search(*args, &block)
+    # wrapper around creating a new Recipe instance and calling search on it
+    node = Chef::Node.new()
+    cookbooks = Chef::CookbookCollection.new()
+    run_context = Chef::RunContext.new(node, cookbooks, nil)
+    return Chef::Recipe.new("test_cookbook", "test_recipe", run_context).search(*args, &block)
+  end
+end
+
+class TestExplicitSearchDB < Test::Unit::TestCase
+  include SearchDbTests
+  include SearchNodeTests
+
+  def search(*args, &block)
+    Chef::Search::Query.new.search(*args, &block)
+  end
+end
+
