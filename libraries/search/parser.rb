@@ -17,7 +17,6 @@
 # limitations under the License.
 #
 
-require 'treetop'
 require 'chef/solr_query/query_transform'
 
 # mock QueryTransform such that we can access the location of the lucene grammar
@@ -70,13 +69,13 @@ module Lucene
       end
     end
   end
-  
+
   # we don't support range matches
   # range of integers would be easy to implement
   # but string ranges are hard
   class FiledRange < Treetop::Runtime::SyntaxNode
   end
-  
+
   # we handle '[* TO *]' as a special case since it is common in
   # cookbooks for matching the existence of keys
   class InclFieldRange
@@ -91,13 +90,13 @@ module Lucene
       end
     end
   end
-  
+
   class ExclFieldRange < FieldRange
   end
-  
+
   class RangeValue < Treetop::Runtime::SyntaxNode
   end
-  
+
   class FieldName < Treetop::Runtime::SyntaxNode
     def match( item )
       if self.text_value.count("_") > 0
@@ -121,13 +120,13 @@ module Lucene
       self.elements[0].match( item )
     end
   end
-  
+
   class Group < Treetop::Runtime::SyntaxNode
     def match( item )
       self.elements[0].match(item)
     end
   end
-  
+
   class BinaryOp < Treetop::Runtime::SyntaxNode
     def match( item )
       self.elements[1].match(
@@ -136,29 +135,29 @@ module Lucene
       )
     end
   end
-  
+
   class OrOperator < Treetop::Runtime::SyntaxNode
     def match( cond1, cond2 )
       cond1 or cond2
     end
   end
-  
+
   class AndOperator < Treetop::Runtime::SyntaxNode
     def match( cond1, cond2 )
       cond1 and cond2
     end
   end
-  
+
   # we don't support fuzzy string matching
   class FuzzyOp < Treetop::Runtime::SyntaxNode
   end
-  
+
   class BoostOp < Treetop::Runtime::SyntaxNode
   end
-  
+
   class FuzzyParam < Treetop::Runtime::SyntaxNode
   end
-  
+
   class UnaryOp < Treetop::Runtime::SyntaxNode
     def match( item )
       self.elements[0].match(
@@ -166,19 +165,19 @@ module Lucene
       )
     end
   end
-  
+
   class NotOperator < Treetop::Runtime::SyntaxNode
     def match( cond )
       not cond
     end
   end
-  
+
   class RequiredOperator < Treetop::Runtime::SyntaxNode
   end
-  
+
   class ProhibitedOperator < Treetop::Runtime::SyntaxNode
   end
-  
+
   class Phrase < Treetop::Runtime::SyntaxNode
     # a quoted ::Term
     def match( value )
@@ -207,7 +206,7 @@ class Query
     self.clean_tree(tree)
     tree
   end
-  
+
   private
 
   def self.clean_tree(root_node)
