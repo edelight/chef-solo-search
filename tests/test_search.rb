@@ -193,7 +193,7 @@ module SearchNodeTests
   def test_list_nodes
     nodes = search(:node)
     assert_equal Chef::Node, nodes.first.class
-    assert_equal 2, nodes.length
+    assert_equal 3, nodes.length
   end
 
   def test_search_node_with_wide_filter
@@ -209,6 +209,11 @@ module SearchNodeTests
   def test_search_node_with_attr_filter
     nodes = search(:node, "hostname:beta.example.com")
     assert_equal 1, nodes.length
+  end
+
+  def test_search_node_without_json_class
+    nodes = search(:node, "chef_environment:default")
+    assert_equal 3, nodes.length
   end
 end
 

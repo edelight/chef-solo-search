@@ -65,7 +65,7 @@ module Search
       _result = []
       Dir.glob(File.join(Chef::Config[:data_bag_path], "node", "*.json")).map do |f|
         # parse and hashify the node
-        node = Chef::Node.json_create(JSON.parse(IO.read(f)))
+        node = Chef::JSONCompat.from_json(IO.read(f))
         if _query.match(node.to_hash)
           _result << node
         end
@@ -77,7 +77,7 @@ module Search
       _result = []
       Dir.glob(File.join(Chef::Config[:role_path], "*.json")).map do |f|
         # parse and hashify the role
-        role = Chef::Role.json_create(JSON.parse(IO.read(f)))
+        role = Chef::JSONCompat.from_json(IO.read(f))
         if _query.match(role.to_hash)
           _result << role
         end
