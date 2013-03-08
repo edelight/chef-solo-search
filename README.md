@@ -1,5 +1,7 @@
 # chef-solo-search
 
+[![Build Status](https://travis-ci.org/edelight/chef-solo-search.png?branch=master)](https://travis-ci.org/edelight/chef-solo-search)
+
 Chef-solo-search is a cookbook library that adds data bag search powers
 to Chef Solo. Data bag support was added to Chef Solo by Chef 0.10.4.
 Please see *Supported queries* for a list of query types which are supported.
