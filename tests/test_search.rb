@@ -202,7 +202,7 @@ module SearchNodeTests
 
   def test_search_node_with_wide_filter
     nodes = search(:node, "role:test_server AND chef_environment:default")
-    assert_equal 2, nodes.length
+    assert_equal 3, nodes.length
   end
 
   def test_search_node_with_narrow_filter
