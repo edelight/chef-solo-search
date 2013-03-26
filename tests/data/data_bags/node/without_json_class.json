@@ -1,7 +1,7 @@
 {
   "id": "without_json_class",
   "name": "wjc.example.com",
-  "chef_environment": "default",
+  "chef_environment": "_default",
   "hostname": "wjc.example.com",
   "run_list": ["role[test_server]"]
 }

@@ -1,0 +1,10 @@
+{
+  "id":       "without_role",
+  "name":     "without_role.example.com",
+  "json_class": "Chef::Node",
+  "run_list": [],
+  "chef_environment": "_default",
+  "automatic": {
+    "hostname": "withoutrole.example.com"
+  }
+

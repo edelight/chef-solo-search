@@ -25,6 +25,7 @@ require "chef"
 # the location of the data_bag
 Chef::Config[:solo] = true
 Chef::Config[:data_bag_path] = "#{File.dirname(__FILE__)}/data/data_bags"
+Chef::Config[:role_path] = "#{File.dirname(__FILE__)}/data/roles"
 
 # load the extension
 require File.expand_path('../../libraries/search', __FILE__)
@@ -195,17 +196,18 @@ module SearchNodeTests
     nodes = search(:node)
     assert_equal Chef::Node, nodes.find{ |n| n["hostname"] == "alpha.example.com" }.class
     assert_equal Chef::Node, nodes.find{ |n| n["hostname"] == "beta.example.com" }.class
-    assert_equal Hash, nodes.find{ |n| n["hostname"] == "wjc.example.com" }.class
-    assert_equal 3, nodes.length
+    assert_equal Chef::Node, nodes.find{ |n| n["hostname"] == "wjc.example.com" }.class
+    assert_equal Chef::Node, nodes.find{ |n| n["hostname"] == "withoutrole.example.com" }.class
+    assert_equal 4, nodes.length
   end
 
   def test_search_node_with_wide_filter
-    nodes = search(:node, "role:test_server AND chef_environment:default")
-    assert_equal 2, nodes.length
+    nodes = search(:node, "role:test_server AND chef_environment:_default")
+    assert_equal 3, nodes.length
   end
 
   def test_search_node_with_narrow_filter
-    nodes = search(:node, "role:beta_server")
+    nodes = search(:node, "role:app_server")
     assert_equal 1, nodes.length
   end
 
@@ -215,14 +217,48 @@ module SearchNodeTests
   end
 
   def test_search_node_without_json_class
-    nodes = search(:node, "chef_environment:default")
-    assert_equal 3, nodes.length
+    nodes = search(:node, "chef_environment:_default")
+    assert_equal 4, nodes.length
+  end
+
+  def test_role_accessible
+    nodes = search(:node, "hostname:beta.example.com")
+    assert_equal 1, nodes.length
+
+    node = nodes.first
+    assert_equal node.class, Chef::Node
+    assert_equal false, node['roles'].nil?
+    assert_equal node['roles'], ["test_server", "app_server"]
+  end
+
+  def test_role_always_present
+    nodes = search(:node, "hostname:withoutrole.example.com")
+    assert_equal 1, nodes.length
+
+    node = nodes.first
+    assert_equal node.class, Chef::Node
+    assert_equal node['roles'], []
+  end
+end
+
+module SearchRoleTests
+  def test_json_search
+    roles = search(:role, "name:monitoring")
+    assert_equal 1, roles.length
+    assert_equal roles.first.name, "monitoring"
+  end
+
+  def test_rb_search
+    roles = search(:role, "name:app_server")
+    assert_equal 1, roles.length
+    assert_equal roles.first.description, "App server"
   end
 end
 
 class TestImplicitSearchDB < Test::Unit::TestCase
   include SearchDbTests
   include SearchNodeTests
+  include SearchRoleTests
 
   def search(*args, &block)
     # wrapper around creating a new Recipe instance and calling search on it
@@ -236,6 +272,7 @@ end
 class TestExplicitSearchDB < Test::Unit::TestCase
   include SearchDbTests
   include SearchNodeTests
+  include SearchRoleTests
 
   def search(*args, &block)
     Chef::Search::Query.new.search(*args, &block)
