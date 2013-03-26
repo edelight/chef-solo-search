@@ -64,8 +64,21 @@ module Search
     def search_nodes(_query, start, rows, &block)
       _result = []
       Dir.glob(File.join(Chef::Config[:data_bag_path], "node", "*.json")).map do |f|
-        # parse and hashify the node
-        node = Chef::JSONCompat.from_json(IO.read(f))
+        content = File.read(f)
+        json = Yajl::Parser.parse(content)
+        json["recipes"]    ||= [] # Hacks, because chef assumes that this keys always exists.
+        json["automatic"]  ||= {}
+        json["json_class"] ||= "Chef::Node" # Accept node files without json class declaration
+
+        if json.has_key?("hostname")
+          json["automatic"]["hostname"] = json.delete("hostname")
+        end
+
+        node = Chef::Node.json_create(json) # Create a chef node to ensure expansion of data
+
+        # Forcibly set our custom automatic variables
+        node.instance_variable_set(:@automatic, Chef::Node::VividMash.new(node, json["automatic"]))
+
         if _query.match(node.to_hash)
           _result << node
         end
