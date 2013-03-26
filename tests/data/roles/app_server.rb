@@ -1,3 +1,3 @@
 description "App server"
-name "app-server"
+name "app_server"
 run_list(["recipe[apache]"])
