@@ -1,7 +1,9 @@
-language: ruby
+before_install: gem update --system 1.8.25
+before_script:  chef-solo -v
 rvm:
-  - "1.9.3"
-  - "1.9.2"
-  - "1.8.7"
-before_install: gem install chef
-script: ruby -Ilibraries tests/test_search.rb -v
+  - 1.9.3
+  - 1.9.2
+  - 1.8.7
+gemfile:
+  - tests/gemfiles/Gemfile.11
+  - tests/gemfiles/Gemfile.10

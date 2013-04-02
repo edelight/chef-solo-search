@@ -28,8 +28,9 @@ Chef::Config[:data_bag_path] = "tests/data/data_bags"
 def data_bag_item(bag, item)
   # wrapper around creating a new Recipe instance and calling data_bag on it
   node = Chef::Node.new()
+  events = Chef::EventDispatch::Dispatcher.new
   cookbooks = Chef::CookbookCollection.new()
-  run_context = Chef::RunContext.new(node, cookbooks)
+  run_context = Chef::RunContext.new(node, cookbooks, events)
   return Chef::Recipe.new("test_cookbook", "test_recipe", run_context).data_bag_item(bag, item)
 end
 
@@ -40,5 +41,5 @@ class TestDataBags < Test::Unit::TestCase
     assert_equal item["age"], 42
     assert_equal item[:age], nil    #upstream code for chef-solo does not use mashes
   end
-  
+
 end

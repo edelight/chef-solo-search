@@ -140,4 +140,4 @@ You can use the standard databag objects in json form
 
 Running tests is as simple as:
 
-    % ruby -Ilibraries tests/test_search.rb -v
+    % rake test
