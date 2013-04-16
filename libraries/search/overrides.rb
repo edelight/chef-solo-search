@@ -63,7 +63,8 @@ module Search
 
     def search_nodes(_query, start, rows, &block)
       _result = []
-      Dir.glob(File.join(Chef::Config[:data_bag_path], "node", "*.json")).map do |f|
+      node_path = Chef::Config[:nodes_path] || File.join(Chef::Config[:data_bag_path], "node")
+      Dir.glob(File.join(node_path, "*.json")).map do |f|
         # parse and hashify the node
         node = Chef::JSONCompat.from_json(IO.read(f))
         if _query.match(node.to_hash)
