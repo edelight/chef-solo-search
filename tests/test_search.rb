@@ -25,6 +25,7 @@ require "chef"
 # the location of the data_bag
 Chef::Config[:solo] = true
 Chef::Config[:data_bag_path] = "#{File.dirname(__FILE__)}/data/data_bags"
+Chef::Config[:role_path] = "#{File.dirname(__FILE__)}/data/roles"
 
 # load the extension
 require File.expand_path('../../libraries/search', __FILE__)
@@ -220,9 +221,24 @@ module SearchNodeTests
   end
 end
 
+module SearchRoleTests
+  def test_json_search
+    roles = search(:role, "name:monitoring")
+    assert_equal 1, roles.length
+    assert_equal roles.first.name, "monitoring"
+  end
+
+  def test_rb_search
+    roles = search(:role, "name:app-server")
+    assert_equal 1, roles.length
+    assert_equal roles.first.description, "App server"
+  end
+end
+
 class TestImplicitSearchDB < Test::Unit::TestCase
   include SearchDbTests
   include SearchNodeTests
+  include SearchRoleTests
 
   def search(*args, &block)
     # wrapper around creating a new Recipe instance and calling search on it
@@ -236,6 +252,7 @@ end
 class TestExplicitSearchDB < Test::Unit::TestCase
   include SearchDbTests
   include SearchNodeTests
+  include SearchRoleTests
 
   def search(*args, &block)
     Chef::Search::Query.new.search(*args, &block)
