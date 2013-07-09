@@ -13,8 +13,11 @@ Please see *Supported queries* for a list of query types which are supported.
 
 ## Installation
 
-In order to use this extension, create a (dummy-) cookbook and add a directory
-called *libraries*. Next copy *libraries/search.rb* and *libraries/parser.rb* to the newly created directory.
+Install this cookbook into your Chef repository using your favorite cookbook
+management tool
+([Librarian](https://github.com/applicationsonline/librarian-chef),
+[Berkshelf](https://github.com/RiotGames/berkshelf), knife...).
+
 Now you have to make sure chef-solo knows about data bags, therefore add
 
     data_bag_path "<node_work_path>/data_bags"
