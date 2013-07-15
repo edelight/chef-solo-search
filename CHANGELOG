@@ -2,6 +2,10 @@
 chef-solo-search Changelog
 ==========================
 
+Version 0.4.1, July 15, 2013
+----------------------------
+* Added cookbook 'vagrant-save' to save node data.
+
 Version 0.4.0, March 8, 2013
 ----------------------------
 * Added support for 'chef_environment:_default' to queries.
