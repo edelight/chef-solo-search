@@ -132,6 +132,18 @@ You can use the standard node objects in json form.
       ]
     }
 
+#### Vagrant
+If you are using Vagrant, you can generate json node data from your
+Vagrant nodes, and then search on this node data as documented above. To
+generate json node data, add the following to the end of your Vagrant
+node's run-list:
+
+    recipe[chef-solo-search::vagrant-save]
+
+The `vagrant-save` recipe assumes that your vagrant VM has its shared
+data directory mounted on `/vagrant`. Node data is written to
+`/vagrant/data_bags/node/<hostname>.json`.
+
 ### Databags
 You can use the standard databag objects in json form
 
