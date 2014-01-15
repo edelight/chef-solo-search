@@ -30,6 +30,12 @@ class Chef
   end
 end
 
+class Chef::EncryptedDataBagItem
+   def keys
+     @enc_hash.keys
+ end
+end
+
 def build_flat_hash(hsh, prefix="")
   result = {}
   hsh.each_pair do |key, value|
@@ -106,7 +112,7 @@ module Lucene
         part = self.text_value.chomp("*")
         item.keys.collect{ |key| key.start_with?(part)? key: nil}.compact
       else
-        if item.has_key?(self.text_value)
+        if item[self.text_value]
           [self.text_value,]
         else
           nil
@@ -219,4 +225,3 @@ class Query
     root_node.elements.each { |node| self.clean_tree(node) }
   end
 end
-
