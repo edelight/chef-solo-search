@@ -99,14 +99,20 @@ module Lucene
 
   class FieldName < Treetop::Runtime::SyntaxNode
     def match( item )
+      my_item = {}
+      if item.class == Chef::EncryptedDataBagItem
+        item.to_hash.keys.each { |k| my_item[k] = item[k] }
+      else
+        my_item = item
+      end
       if self.text_value.count("_") > 0
-        item.merge!(build_flat_hash(item))
+        my_item.merge!(build_flat_hash(item))
       end
       if self.text_value.end_with?("*")
         part = self.text_value.chomp("*")
-        item.keys.collect{ |key| key.start_with?(part)? key: nil}.compact
+        my_item.keys.collect{ |key| key.start_with?(part)? key: nil}.compact
       else
-        if item.has_key? self.text_value
+        if my_item.has_key? self.text_value
           [self.text_value,]
         else
           nil
