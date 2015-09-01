@@ -30,7 +30,7 @@ Chef::Config[:data_bag_path] = "#{File.dirname(__FILE__)}/data/data_bags"
 require File.expand_path('../../libraries/search', __FILE__)
 
 module SearchDbTests
-  
+
   def test_search_all
     # try to get data of all users
     nodes = search(:users, "*:*")
@@ -40,19 +40,19 @@ module SearchDbTests
     nodes = search(:users, nil)
     assert_equal nodes.length, 4
   end
-  
+
   def test_search_exact_match
     nodes = search(:users, "username:speedy")
     assert_equal nodes.length, 1
     assert_equal nodes[0]["username"], "speedy"
   end
-  
+
   def test_get_all_with_field
     nodes = search(:users, "username:*")
     assert nodes.length > 0
     assert nodes.all?{|x| !x["username"].nil?}
   end
-  
+
   def test_get_all_without_field
     nodes = search(:users, "(NOT username:*)")
     assert nodes.length == 0
@@ -60,13 +60,13 @@ module SearchDbTests
     assert nodes.length == 3
     assert nodes.all?{|x| x["color"].nil?}
   end
-  
+
   def test_get_all_but_speedy
     nodes = search(:users, "NOT username:speedy")
     assert nodes.length > 0
     assert nodes.all?{|x| x["username"] != "speedy"}
   end
-  
+
   def test_array_includes
     nodes = search(:users, "children:tom")
     assert nodes.length == 2
@@ -75,7 +75,7 @@ module SearchDbTests
     assert nodes.length == 1
     assert nodes.all?{ |x| x["children"].include?("jerry") }
   end
-  
+
   def test_boolean
     nodes = search(:users, "married:true")
     assert nodes.length == 3
@@ -84,24 +84,24 @@ module SearchDbTests
     assert nodes.length == 1
     assert nodes[0]["married"] == false
   end
-  
+
   def test_integer
     nodes = search(:users, "age:35")
     assert nodes.length == 1
     assert nodes[0]["age"] == 35
   end
-  
+
   def test_AND_condition
     nodes = search(:users, "married:true AND age:35")
     assert nodes.length == 1
     assert nodes[0]["username"] == "lea"
   end
-  
+
   def test_OR_condition
     nodes = search(:users, "age:42 OR age:22")
     assert nodes.length == 2
   end
-  
+
   def test_NOT_condition
     nodes = search(:users, "children:tom AND (NOT gender:female)")
     assert nodes.length == 1
@@ -110,29 +110,29 @@ module SearchDbTests
     nodes = search(:users, "children:tom AND (NOT gender:female) AND (NOT age:42)")
     assert nodes.length == 0
   end
-  
+
   def test_any_value
     nodes = search(:users, "children:*")
     assert nodes.length == 2
   end
-  
+
   def test_any_value_lucene_range
     nodes = search(:users, "address:[* TO *]")
     assert nodes.length == 2
   end
-  
+
   def test_general_lucene_range_fails
     assert_raises RuntimeError do
       nodes = search(:users, "children:[aaa TO zzz]")
     end
   end
-  
+
   def test_block_usage
     # bracket syntax
     result = []
     search(:users, "*:*") {|x| result << x["id"]}
     assert result.length == 4
-    
+
     # do...end syntax
     result = []
     search(:users) do |x|
@@ -140,7 +140,7 @@ module SearchDbTests
     end
     assert result.length == 4
   end
-  
+
   def test_check_escaped_chars
     nodes = search(:users, 'tag:tag\:\:test')
     assert nodes.length == 1
@@ -155,7 +155,7 @@ module SearchDbTests
     nodes = search(:users, "tags:tag\\:\\:*")
     assert nodes.length == 1
   end
-  
+
   def test_wildcards
     nodes = search(:users, "gender:f??ale")
     assert nodes.length == 1
@@ -164,7 +164,7 @@ module SearchDbTests
     nodes = search(:users, "username:spee*")
     assert nodes.length == 1
   end
-  
+
   def test_empty_field_value
     assert_raise(RuntimeError) {
       search(:users, "gender:#{nil} AND age:35")
@@ -176,17 +176,25 @@ module SearchDbTests
       search(:users, "gender:\"\" AND age:35")
     }
   end
-  
+
   def test_OR_group
     nodes = search(:users, "id:(mike OR tom)")
     assert nodes.length == 2
   end
-  
+
   def test_nested_fieldnames
     nodes = search(:users, "address_street:wilhelmsstrasse")
     assert nodes.length == 1
     nodes = search(:users, "address_street_floor:1")
     assert nodes.length == 1
+  end
+
+  def test_search_with_filter_result
+    nodes = search(:users, "id:(mike OR tom)", :filter_result => {
+      :addr => ['address', 'street', 'floor']
+    })
+    assert_equal 1, nodes[0]['addr']
+    assert_equal nil, nodes[1]['addr']
   end
 end
 
@@ -217,6 +225,13 @@ module SearchNodeTests
   def test_search_node_without_json_class
     nodes = search(:node, "chef_environment:default")
     assert_equal 3, nodes.length
+  end
+
+  def test_search_with_filter_result
+    nodes = search(:node, "chef_environment:default", :filter_result => {
+      :hostname => ['hostname']
+    })
+    assert_equal [['hostname'], ['hostname'], ['hostname']], nodes.map(&:keys)
   end
 end
 

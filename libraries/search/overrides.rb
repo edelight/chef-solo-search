@@ -33,7 +33,7 @@ module Search
     # This search() method returns a block iterator or an Array, depending
     # on how this method is called.
     def search(obj, query=nil, sort=nil, start=0, rows=1000, &block)
-      if !sort.nil?
+      if !sort.nil? and sort.keys != [:filter_result]
         raise "Sorting search results is not supported"
       end
       _query = Query.parse(query)
@@ -54,6 +54,9 @@ module Search
         _result += bags
       end
 
+      if sort.respond_to?(:has_key?) and sort.has_key?(:filter_result)
+        _result.map! { |r| apply_filter_result(r, sort[:filter_result]) }
+      end
 
       if block_given?
         pos = 0
@@ -64,6 +67,23 @@ module Search
       else
         return _result.slice(start, rows)
       end
+    end
+
+    def apply_filter_result(result, filter)
+      filtered = {}
+      filter.each_pair do |k, path|
+        filtered[k.to_s] = hash_path(result, path)
+      end
+      filtered
+    end
+
+    def hash_path(value, path)
+      path.each do |k|
+        value = value[k]
+      end
+      value
+    rescue
+      nil
     end
 
     def search_nodes(_query, start, rows, &block)
