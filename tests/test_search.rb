@@ -251,38 +251,18 @@ module SearchOnEncryptedDataBag
   end
 end
 
-class TestImplicitSearchDB < Test::Unit::TestCase
-  include SearchNodeTests
-  include SearchDbTests
-  include ImplicitSearchDB
-end
-
-class TestExplicitSearchDB < Test::Unit::TestCase
-  include SearchNodeTests
-  include SearchDbTests
-  include ExplicitSearchDB
-end
-
-class TestImplicitSearchDbWithEncryptionKey < Test::Unit::TestCase
-  include SearchDbTests
-  include ImplicitSearchDB
-  include SearchWithEncryptionKey
-end
-
-class TestExplicitSearchDbWithEncryptionKey < Test::Unit::TestCase
-  include SearchDbTests
-  include ExplicitSearchDB
-  include SearchWithEncryptionKey
-end
-
-class TestImplicitSearchDbWithEncryptedDataBag < Test::Unit::TestCase
-  include SearchDbTests
-  include ImplicitSearchDB
-  include SearchOnEncryptedDataBag
-end
-
-class TestExplicitSearchDbWithEncryptedDataBag < Test::Unit::TestCase
-  include SearchDbTests
-  include ExplicitSearchDB
-  include SearchOnEncryptedDataBag
+[ImplicitSearchDB, ExplicitSearchDB].each do |search_module|
+  #for each permutation, run db tests
+  [:Base, SearchWithEncryptionKey, SearchOnEncryptedDataBag].each do |db_search_mode|
+    Object.const_set("Test#{search_module}#{db_search_mode}", Class.new(Test::Unit::TestCase)).class_eval do
+      include SearchDbTests
+      include search_module
+      #but for base, also run node tests
+      if db_search_mode == :Base
+        include SearchNodeTests
+      else
+        include db_search_mode
+      end
+    end
+  end
 end
